@@ -1,0 +1,40 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #0d4c75; 
+  padding: 1rem 2rem;
+  color: white;
+  direction: rtl;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.header-title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.header-nav {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-grow: 1;
+}
+
+.nav-link {
+  color: white;
+  text-decoration: underline;
+  font-size: 1.2rem;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+  color: #f9d783; 
+}
+
+.header-logo img {
+  height: 60px;
+  width: auto;
+}
