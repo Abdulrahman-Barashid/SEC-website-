@@ -10,16 +10,28 @@ const Sidebar = ({ orders, onDeleteOrder }) => {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('ar-SA', {
+    
+    // determine AM/PM
+    const hour = date.getHours();
+    const ampm = hour < 12 ? 'ص' : 'م';
+    
+    const formatter = new Intl.DateTimeFormat('ar-SA', {
       year: 'numeric',
-      month: 'short',
+      month: 'short', 
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      hour12: true 
     });
+    
+    
+    let formattedDate = formatter.format(date);
+    formattedDate = formattedDate.replace(/AM|ص/g, 'ص').replace(/PM|م/g, 'م');
+    
+    return formattedDate;
   };
 
-  // Sort orders by creation date (oldest first)
+  // Sort orders (oldest first)
   const sortedOrders = [...orders].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
 
   return (

@@ -63,21 +63,36 @@
 
 .form-group input[type="text"],
 .form-group input[type="tel"] {
-  color: #000;
+  color: #000 !important;
   padding: 0.8rem 1rem;
   border: 2px solid #e2e8f0;
   border-radius: 10px;
   font-size: 1rem;
   transition: all 0.3s ease;
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(173, 216, 230, 0.6) !important;
+  box-shadow: none !important;
+}
+
+/* Make autofill styling match the blue background */
+.form-group input[type="text"]:-webkit-autofill,
+.form-group input[type="tel"]:-webkit-autofill,
+.form-group input[type="text"]:-webkit-autofill:hover,
+.form-group input[type="tel"]:-webkit-autofill:hover,
+.form-group input[type="text"]:-webkit-autofill:focus,
+.form-group input[type="tel"]:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px rgba(173, 216, 230, 0.6) inset !important;
+  -webkit-text-fill-color: #000 !important;
+  background-color: rgba(173, 216, 230, 0.6) !important;
+  border: 2px solid #e2e8f0 !important;
 }
 
 .form-group input[type="text"]:focus,
 .form-group input[type="tel"]:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
   transform: translateY(-2px);
+  background: rgba(173, 216, 230, 0.8) !important;
 }
 
 .file-group {
@@ -156,6 +171,13 @@
 
 .submit-button:active {
   transform: translateY(-1px);
+}
+
+.submit-button:disabled {
+  background: #a0aec0;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .reservation-form-container {

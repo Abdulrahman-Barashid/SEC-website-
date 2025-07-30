@@ -45,6 +45,32 @@ const upload = multer({
   }
 });
 
+// Function to get Saudi Arabia time
+const getSaudiTime = () => {
+  // Get current time in Saudi Arabia timezone
+  const now = new Date();
+  const saudiTime = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Riyadh',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  }).formatToParts(now);
+
+  // Build ISO string manually
+  const year = saudiTime.find(part => part.type === 'year').value;
+  const month = saudiTime.find(part => part.type === 'month').value;
+  const day = saudiTime.find(part => part.type === 'day').value;
+  const hour = saudiTime.find(part => part.type === 'hour').value;
+  const minute = saudiTime.find(part => part.type === 'minute').value;
+  const second = saudiTime.find(part => part.type === 'second').value;
+
+  return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+};
+
 // Initialize SQLite Database
 const db = new sqlite3.Database('./reservations.db', (err) => {
   if (err) {
@@ -59,7 +85,7 @@ const db = new sqlite3.Database('./reservations.db', (err) => {
       phone TEXT NOT NULL,
       fileName TEXT,
       filePath TEXT,
-      createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+      createdAt DATETIME NOT NULL
     )`);
   }
 });
@@ -87,10 +113,11 @@ app.post('/api/reservations', upload.single('file'), (req, res) => {
 
   const fileName = req.file ? req.file.originalname : null;
   const filePath = req.file ? req.file.filename : null;
+  const createdAt = getSaudiTime(); // Use Saudi time instead of CURRENT_TIMESTAMP
 
   db.run(
-    'INSERT INTO reservations (name, phone, fileName, filePath) VALUES (?, ?, ?, ?)',
-    [name, phone, fileName, filePath],
+    'INSERT INTO reservations (name, phone, fileName, filePath, createdAt) VALUES (?, ?, ?, ?, ?)',
+    [name, phone, fileName, filePath, createdAt],
     function(err) {
       if (err) {
         res.status(500).json({ error: err.message });
@@ -122,7 +149,6 @@ app.delete('/api/reservations/:id', (req, res) => {
     
     if (!row) {
       res.status(404).json({ error: 'Reservation not found' });
-      return;
     }
     
     // Delete file if exists
