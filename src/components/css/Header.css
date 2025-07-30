@@ -10,7 +10,7 @@
 }
 
 .header-title {
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-weight: bold;
   white-space: nowrap;
 }
@@ -24,14 +24,21 @@
 
 .nav-link {
   color: white;
-  text-decoration: underline;
-  font-size: 1.2rem;
-  font-weight: 500;
-  transition: color 0.3s ease;
+  font-size: 1.5rem;
+  font-weight: 400;
+  text-decoration: none;
+  padding-bottom: 4px;
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s ease;
 }
 
 .nav-link:hover {
   color: #f9d783; 
+}
+
+.nav-link.active {
+  border-bottom: 2px solid #f9d783;
+  color: #f9d783;
 }
 
 .header-logo img {

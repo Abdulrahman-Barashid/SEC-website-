@@ -16,7 +16,7 @@ const Home = () => {
 
   <div className="ad-card">
     <img src={taskImage2} alt="Task 2" className="ads-image" />
-    <p className="ad-description">تحليل مرئي للبيانات من قاعدة بيانات وهمية باستخدام Power BI</p>
+    <p className="ad-description"> Power BIتحليل مرئي للبيانات من قاعدة بيانات تجريبية بإستخدام</p>
   </div>
 </div>
 
