@@ -7,18 +7,20 @@ const ReservationForm = ({ onSubmit }) => {
     phone: '',
     file: null
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [filePreview, setFilePreview] = useState(null);
 
   const handleInputChange = (e) => {
-  const { name, value } = e.target;
+    const { name, value } = e.target;
 
-  if (name === 'name') {
-    const lettersOnly = value.replace(/[^A-Za-z\u0600-\u06FF\s]/g, ''); 
-    setFormData(prev => ({ ...prev, [name]: lettersOnly }));
-  } else if (name === 'phone') {
-  const digitsOnly = value.replace(/\D/g, '').slice(0, 10); 
-  setFormData(prev => ({ ...prev, [name]: digitsOnly }));
-}
-};
+    if (name === 'name') {
+      const lettersOnly = value.replace(/[^A-Za-z\u0600-\u06FF\s]/g, ''); 
+      setFormData(prev => ({ ...prev, [name]: lettersOnly }));
+    } else if (name === 'phone') {
+      const digitsOnly = value.replace(/\D/g, '').slice(0, 10); 
+      setFormData(prev => ({ ...prev, [name]: digitsOnly }));
+    }
+  };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -26,25 +28,80 @@ const ReservationForm = ({ onSubmit }) => {
       ...prev,
       file: file
     }));
+
+    // Create preview URL for the file
+    if (file) {
+      const previewUrl = URL.createObjectURL(file);
+      setFilePreview(previewUrl);
+    } else {
+      setFilePreview(null);
+    }
   };
 
-  const handleSubmit = () => {
-  if (
-    formData.name &&
-    formData.phone &&
-    formData.phone.length === 10 
-  ) {
-    onSubmit({
-      ...formData,
-      date: new Date().toLocaleDateString('ar-SA')
-    });
-    setFormData({ name: '', phone: '', file: null });
+  const handlePreviewFile = () => {
+    if (filePreview) {
+      window.open(filePreview, '_blank');
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setFormData(prev => ({ ...prev, file: null }));
+    setFilePreview(null);
     const fileInput = document.getElementById('file-upload');
     if (fileInput) fileInput.value = '';
-  } else {
-    alert('يرجى التأكد من إدخال الاسم ورقم هاتف مكوّن من 10 أرقام.');
-  }
-};
+  };
+
+  const handleSubmit = async () => {
+    if (
+      formData.name &&
+      formData.phone &&
+      formData.phone.length === 10 
+    ) {
+      setIsSubmitting(true);
+      
+      try {
+        // Create FormData for file upload
+        const submitData = new FormData();
+        submitData.append('name', formData.name);
+        submitData.append('phone', formData.phone);
+        if (formData.file) {
+          submitData.append('file', formData.file);
+        }
+
+        // Send to backend API
+        const response = await fetch('http://localhost:5000/api/reservations', {
+          method: 'POST',
+          body: submitData
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to save reservation');
+        }
+
+        const savedReservation = await response.json();
+        
+        // Call parent component's onSubmit function
+        onSubmit(savedReservation);
+        
+        // Reset form
+        setFormData({ name: '', phone: '', file: null });
+        setFilePreview(null);
+        const fileInput = document.getElementById('file-upload');
+        if (fileInput) fileInput.value = '';
+        
+        alert('تم حفظ الطلب بنجاح!');
+        
+      } catch (error) {
+        console.error('Error saving reservation:', error);
+        alert(`حدث خطأ أثناء حفظ الطلب: ${error.message}`);
+      } finally {
+        setIsSubmitting(false);
+      }
+    } else {
+      alert('يرجى التأكد من إدخال الاسم ورقم هاتف مكوّن من 10 أرقام.');
+    }
+  };
 
   return (
     <main className="main-form">
@@ -62,6 +119,7 @@ const ReservationForm = ({ onSubmit }) => {
                 onChange={handleInputChange}
                 placeholder="أدخل الاسم"
                 required
+                disabled={isSubmitting}
               />
             </div>
             <div className="form-group">
@@ -74,6 +132,7 @@ const ReservationForm = ({ onSubmit }) => {
                 onChange={handleInputChange}
                 placeholder="أدخل رقم الهاتف"
                 required
+                disabled={isSubmitting}
               />
             </div>
           </div>
@@ -87,20 +146,51 @@ const ReservationForm = ({ onSubmit }) => {
                 type="file"
                 id="file-upload"
                 onChange={handleFileChange}
-                accept=".pdf,.doc,.docx,.jpg,.png"
+                accept=".pdf,.doc,.docx,.jpg,.png,.jpeg,.gif"
                 className="file-input"
+                disabled={isSubmitting}
               />
-              <button type="button" className="file-button" onClick={() => document.getElementById('file-upload').click()}>
+              <button 
+                type="button" 
+                className="file-button" 
+                onClick={() => document.getElementById('file-upload').click()}
+                disabled={isSubmitting}
+              >
                 اختر ملف
               </button>
               {formData.file && (
-                <span className="file-name">{formData.file.name}</span>
+                <div className="file-preview">
+                  <span className="file-name">📎 {formData.file.name}</span>
+                  <div className="file-actions">
+                    <button
+                      type="button"
+                      className="preview-button"
+                      onClick={handlePreviewFile}
+                      disabled={isSubmitting}
+                    >
+                      معاينة
+                    </button>
+                    <button
+                      type="button"
+                      className="remove-button"
+                      onClick={handleRemoveFile}
+                      disabled={isSubmitting}
+                    >
+                      إزالة
+                    </button>
+                  </div>
+                </div>
               )}
             </div>
           </div>
           
-          <button type="button" onClick={handleSubmit} className="submit-button">
-            حفظ الطلب
+          <button 
+            type="button" 
+            onClick={handleSubmit} 
+            className="submit-button"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'جاري الحفظ...' : 'حفظ الطلب'}
           </button>
         </div>
       </div>
